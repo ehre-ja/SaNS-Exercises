@@ -4,11 +4,14 @@
 ## Setup:
 
 No acces to GUI -> Send file from local machine to VM
-
+```
 docker-compose build
 docker-compose up
 docker ps
-![alt text](image.png)
+```
+
+
+![Running docker containers](image.png)
 
 Logging into all three containers
 
@@ -57,7 +60,7 @@ pkt = E/A
 sendp(pkt)
 ```
 #### Result:
-![alt text](image-1.png)
+![Result of Task 1A](image-1.png)
 
 ---
 
@@ -145,18 +148,22 @@ sendp(pkt)
 ### Step 1: Poison the ARP caches
 
 - [x] In A's cache: B's IP address maps to M's MAC address
+
 ![image](https://github.com/user-attachments/assets/ee675787-4807-4192-aa70-55a53fc0ea66)
 
 - [x] In B's cache: A's IP address maps to M's MAC address
+
 ![image](https://github.com/user-attachments/assets/d8c4bc2e-e9e8-4509-8419-8234ea99fae1)
 
 ### Step 2: Test Ping between A and B without IP forwarding on M
 #### Result:
 - only some icmp packets go through --> inconsistent icmp_seq numbers
 - noticable delay between ping responses
+
 ![image](https://github.com/user-attachments/assets/58abdd81-3e24-4041-9310-b563404ffcbb)
 
 #### Wireshark:
+
 ![image](https://github.com/user-attachments/assets/2e2620ea-6e25-4b15-a682-df74cd5e9625)
 
 
@@ -165,9 +172,11 @@ sendp(pkt)
 - All icmp packets arrive
 - Destination IP address is not the pinged address
 - Redirect host message
+
 ![image](https://github.com/user-attachments/assets/7cf2f12c-62f2-4fab-9194-ebb6858ab54c)
 
 #### Wireshark
+
 ![image](https://github.com/user-attachments/assets/3ca63bdf-b4f3-4161-bba5-3301040a63ac)
 
 
@@ -211,12 +220,15 @@ sniff(filter="tcp and port 23 and not ether src host 02:42:0a:09:00:69", iface="
 
 #### Wireshark
 - MitM not active yet, IP forwarding on
+
 ![image](https://github.com/user-attachments/assets/1a90e621-830b-4aa9-93c2-38e3868114d7)
 
 - MitM not active yet, IP forwarding off
+
 ![image](https://github.com/user-attachments/assets/bbccb53a-8b2e-434c-99c1-59b82cbdb405)
 
 - Active MitM, IP forwarding off
+
 ![image](https://github.com/user-attachments/assets/e482c851-78cb-44b6-bd72-bf06a07bc70f)
 
 ---
@@ -269,9 +281,9 @@ sniff(filter="tcp and port 9090 and not ether src host 02:42:0a:09:00:69", iface
 
  - our names are all replaced
  
- ![image](https://github.com/user-attachments/assets/78be3da4-4b55-40ff-8a32-49f4ecb1e28a)
+ ![input on host A](https://github.com/user-attachments/assets/78be3da4-4b55-40ff-8a32-49f4ecb1e28a)
 
- ![image](https://github.com/user-attachments/assets/088893b7-e29c-4a58-940b-73d9bb375ab6)
+ ![output on host B](https://github.com/user-attachments/assets/088893b7-e29c-4a58-940b-73d9bb375ab6)
 
 
 
