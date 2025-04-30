@@ -223,7 +223,7 @@ sniff(filter="tcp and port 23 and not ether src host 02:42:0a:09:00:69", iface="
 
 ## Task 3
 
-#### Script ussed:
+#### Script used:
 ```python
 #!/usr/bin/env python3
 from scapy.all import *
