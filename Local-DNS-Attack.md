@@ -65,8 +65,10 @@ myFilter = "udp and dst port 53" # only capture UDP traffic with destination por
 pkt=sniff(iface='br-4a379a2ae130', filter=myFilter, prn=spoof_dns)
 ```
 
+With this code, we sniff for DNS requests containing ``` example.com ```, we spoof a reply by swapping target and source IP addresses and ports and creating a DNS answer section containing the 'bad' IP address we want the victim to use for the respective hostname.
+
 When we now execute ``` dig www.example.com ``` on the ``` user ``` machine, we see this:
 
 ![image](https://github.com/user-attachments/assets/393f7f25-df2c-4788-9a2b-f2476ae5434f)
 
-The answer contains the IP adress we inserted (```10.0.2.5```) and our attacker nameserver (```ns.attacker32.com```).
+The answer now contains the attacker machine's IP address (```10.9.0.1```) and not the real address like before.
