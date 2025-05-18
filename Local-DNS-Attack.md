@@ -204,6 +204,6 @@ example.com.            777592  NS      ns.example.com.
                         777592  NS      ns.attacker32.com.
 ```
 
-But none of the entries of the Additional Section are included. Apparently only the two entries of the Authority Section were cached by the local DNS server. We had expected that at least the entry for ```ns.attacker32.com``` would be cached, as there is an Authority Entry for it in the same packet. 
+But none of the entries of the Additional Section are included. Apparently only the two entries of the Authority Section were cached by the local DNS server. We had expected that at least the entry for ```ns.attacker32.com``` would be cached, as there is an Authority Entry for it in the same packet. Possibly, the DNS server is configured to ignore A-records of the Additional Section.
 
 The other two entries were expected to be discarded, as the ```www.facebook.com``` domain is not included in the Authority Section at all and the ```ns.example.net``` is on a different top-level domain (```.net```) than the one in the Authority section.
