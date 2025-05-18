@@ -72,3 +72,29 @@ When we now execute ``` dig www.example.com ``` on the ``` user ``` machine, we 
 ![image](https://github.com/user-attachments/assets/393f7f25-df2c-4788-9a2b-f2476ae5434f)
 
 The answer now contains the attacker machine's IP address (```10.9.0.1```) and not the real address like before.
+
+---
+
+## Task 2: DNS Cache Poisoning Attack - Spoofing Answers
+
+We now want to be the 'man in the middle' between the local DNS server and a remote authoritative DNS server. 
+
+To do this, we only have to change the filter in our spoofing script to only sniff packets that are coming from our local DNS server and are going to port 53 (DNS requests).
+
+```python
+myFilter = "udp and dst port 53 and src host 10.9.0.53" 
+```
+The rest of the script of task 1 stays the same.
+
+So now the dig request on the ```user``` machine gives 
+```
+;; ANSWER SECTION:
+www.example.com.        259200  IN      A       10.9.0.1
+```
+as well.
+
+But the local DNS server cache also contains:
+
+```
+www.example.com.        863957  A       10.9.0.1
+```
