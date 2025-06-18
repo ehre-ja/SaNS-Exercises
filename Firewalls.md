@@ -5,10 +5,12 @@ First, we started the respective containers.
 ![Containers](https://github.com/user-attachments/assets/0763329e-f5ca-48dd-81d9-789f7b1e38e6)
 
 ## Task 2.A
+
 ![Screenshot 2025-06-14 124652](https://github.com/user-attachments/assets/eb0d765f-2700-4197-a760-a3ef0960f25f)
 
 
 Ping from Host 2 to Host 1:
+
 ![Screenshot 2025-06-14 130439](https://github.com/user-attachments/assets/eba9d0c3-730e-4601-9563-fa6f52d2c845)
 
 
@@ -26,12 +28,15 @@ Ping from Host 2 to Host 1:
 
 
 ## Task 3.A 
-- (conntrack timeout in seconds (29 seconds)
+- We observed conntrack timeout in 29 seconds
 
 UDP Experiment:
-![Screenshot 2025-06-14 131028](https://github.com/user-attachments/assets/2d2e25b0-a2ca-451f-b39a-3d1468aec1d1)
+
+![Screenshot 2025-06-14 134712](https://github.com/user-attachments/assets/bf7bba5d-ceb8-4f8f-881c-a615bfd3486a)
+
 
 TCP Experiment:
+
 ![Screenshot 2025-06-14 134053](https://github.com/user-attachments/assets/4efa3457-1e00-4e0f-8b7f-34e7f01ede7b)
 
 
@@ -52,3 +57,36 @@ Stateless Firewall
 ### Best Choice: Stateful firewall for security, stateless only if performance is critical.
 
 ## Task 4
+
+1. Rate Limiting
+
+What it does:
+- Allows packets from 10.9.0.5 at a controlled rate.
+- --limit 10/minute: Permits 10 packets per minute on average.
+- --limit-burst 5: Allows an initial burst of 5 packets before rate limiting kicks in.
+Observation when only this rule is active:
+- First 5 pings (burst) will succeed immediately.
+- After that, packets are limited to ~10 per minute (1 every 6 seconds).
+- Excess packets are not dropped yet—they just get delayed.
+2. Explicit drop
+
+What it does:
+- Drops all packets from 10.9.0.5 that exceed the rate limit.
+- Why it’s needed:
+    - Without this rule, the limit module only delays packets (they stay in a queue).
+    - Attackers could still flood the network—packets would just be slowed down, not blocked.
+    - The DROP rule ensures strict enforcement—exceeding the limit = packets are discarded.
+
+### Yes, the DROP rule is necessary because:
+- The limit module alone does not block traffic—it only slows it down.
+- Without DROP, an attacker could flood the network with delayed packets, consuming resources.
+- The DROP rule ensures hard enforcement of the rate limit, improving security.
+
+![Screenshot 2025-06-14 140634](https://github.com/user-attachments/assets/19a0c494-8509-4270-b779-826a5f8e8f01)
+
+
+## Task 5 
+
+![Screenshot 2025-06-14 144427](https://github.com/user-attachments/assets/506d7732-0c9d-464a-b8d6-4ffe5bdf06a9)
+
+We have applied the rules but were not able to receive messages on the internals hosts.
